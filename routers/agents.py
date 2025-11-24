@@ -6,7 +6,8 @@ from sqlalchemy.orm import joinedload
 
 from base_model import AgentBase, AgentUpdate, AgentRunRequest
 from models import Agent, Tool, Execution
-from utils import generate_prompt, mock_llm_call, check_tenant_limit, db_dependency, api_key_dependency
+from utils import generate_prompt, mock_llm_call, check_tenant_limit, db_dependency, api_key_dependency, \
+    SUPPORTED_MODELS
 
 router = APIRouter()
 
@@ -37,17 +38,6 @@ async def get_agent_by_id(agent_id: int, db: db_dependency, tenant_id: api_key_d
     if not result:
         raise HTTPException(status_code=404, detail="Agent not found.")
     return result
-
-
-@router.delete("")
-async def delete_all_agents(db: db_dependency, tenant_id: api_key_dependency):
-    agents = db.query(Agent).filter(Agent.tenant_id == tenant_id).all()
-    if not agents:
-        raise HTTPException(status_code=404, detail="Agents not found")
-    for agent in agents:
-        db.delete(agent)
-    db.commit()
-    return {"detail": "All agents were deleted"}
 
 
 @router.delete("/{agent_id}")
@@ -114,6 +104,8 @@ async def create_agent(agent_id: int, request: AgentRunRequest, db: db_dependenc
     if not agent:
         raise HTTPException(status_code=404, detail="Agent not found")
     prompt = generate_prompt(agent, request.task)
+    if request.model not in SUPPORTED_MODELS:
+        raise HTTPException(status_code=400, detail="Request model not supported")
     mock_response = mock_llm_call(prompt, request.model)
     db_execution = Execution(
         tenant_id=tenant_id,

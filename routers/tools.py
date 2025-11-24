@@ -33,21 +33,6 @@ async def get_tool_by_id(tool_id: int, db: db_dependency, tenant_id: api_key_dep
     return tool
 
 
-@router.delete("")
-async def delete_all_tools(db: db_dependency, tenant_id: api_key_dependency):
-    used_tools = db.query(agent_tools.c.tool_id).distinct()
-    unused_tools = db.query(Tool).filter(
-        Tool.tenant_id == tenant_id,
-        ~Tool.id.in_(used_tools)
-    ).all()
-    if not unused_tools:
-        raise HTTPException(status_code=404, detail="No unused tools to delete")
-    for tool in unused_tools:
-        db.delete(tool)
-    db.commit()
-    return {"detail": "Deleted unused tools"}
-
-
 @router.delete("/{tool_id}")
 async def delete_tool_by_id(tool_id: int, db: db_dependency, tenant_id: api_key_dependency):
     tool = db.query(Tool).filter(Tool.tenant_id == tenant_id, Tool.id == tool_id).first()

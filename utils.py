@@ -77,7 +77,5 @@ def generate_prompt(agent: Agent, task: str):
 
 
 def mock_llm_call(prompt: str, model: str):
-    if model not in SUPPORTED_MODELS:
-        return f"model {model} not supported!"
     mock_res = prompt.split("\n")[0].strip()
     return f"[mock-response from {model}]: {mock_res}"
