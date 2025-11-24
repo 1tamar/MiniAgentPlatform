@@ -10,6 +10,7 @@ tools and instructions.
 - **Tool Management**: Create and assign tools to agents
 - **Agent Execution**: Run agents with tasks and track execution history
 - **Rate Limiting**: Per-tenant API throttling (e.g.10 requests per 60 seconds)
+
 ---
 
 ## Installation
@@ -18,11 +19,13 @@ tools and instructions.
 
 - Python 3.8 or higher
 - pip
+- git
+- PostgreSQL
 
 ### Setup
 
+1. **Clone the repository**:
 
-1. **Clone the repository**:  
 ```bash
 git clone https://github.com/1tamar/MiniAgentPlatform.git
 cd MiniAgentPlatform
@@ -56,7 +59,6 @@ The server will start at `http://localhost:8000`
 
 ---
 
-
 ## API Authentication
 
 The platform uses API key-based authentication. Each API key represents a different tenant.
@@ -89,12 +91,13 @@ API_KEYS = {
     }
 }
 ```
-Include the API key in the `X-API-Key: tenant_a` header for all requests:
+
+## Include the API key in the `X-API-Key: tenant_a` header for all requests!
 
 ---
 
-
 ## API Endpoints
+
 ## Interactive API Documentation
 
 - **Swagger UI**: http://localhost:8000/docs
@@ -105,29 +108,89 @@ These interfaces allow you to test all endpoints directly from your browser.
 ### Tools
 
 #### - Create - `POST /tools`
+
+```
+Body:
+{
+  "name": "tool1",
+  "description": "Description of tool1"
+}
+```
+
 #### - Get all - `Get /tools`
+
 #### - GET by agent name `/tools?agent_name=agent_name`
+
 #### - Get by tool id - `Get /tools/{tool_id}`
+
 #### - Get by tool name - `Get /tools/{tool_name}`
+
 #### - Update - `PUT /tools/{tool_id}`
+
+```
+Body:
+{
+  "name": "tool1-updated",
+  "description": "New description"
+}
+```
+
 #### - Delete by id - `DELETE /tools/{tool_id}`
 
-
-
 ### Agents
+
 #### - Create - `POST /agents`
+
+```
+Body:
+{
+  "name": "agent1",
+  "role": "assistant",
+  "description": "Agent that does X",
+  "tenant_id": 1,
+  "tool_ids": [1]
+}
+```
+
 #### - Get all - `Get /agents`
+
 #### - GET by tool name `/agents?tool_name=tool_name`
+
 #### - Get by agent id - `Get /agents/{agent_id}`
+
 #### - Get by agent name - `Get /agents/{agent_name}`
+
 #### - Update - `PUT /agents/{agent_id}`
+
+```
+Body:
+{
+  "name": "agent1-updated",
+  "description": "New description",
+  "role":"new role"
+}
+```
+
 #### - Delete by id - `DELETE /agents/{agent_id}`
+
 #### - Run agent by id - `Post /agents/{agent_id}/run`
 
+**model should be one of the SUPPORTED_MODELS: ["gpt-4o", "gpt-4-turbo", "claude-3-opus"]**
+
+```
+Body:
+{
+  "task": "Please summarise the latest report.",
+  "model": "gpt-4o"
+}
+```
 
 ### Executions
+
 #### - Get all - `GET /executions`
+
 #### - Get by agent_id - `GET /executions?agent_id=1`
+
 #### - Get with Pagination - `GET /executions?page=1&page_size=10`
 
 ---
