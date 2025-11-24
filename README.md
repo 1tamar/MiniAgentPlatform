@@ -20,7 +20,9 @@ tools and instructions.
 - Python 3.8 or higher
 - pip
 - git
-- PostgreSQL
+- PostgreSQL: 
+  - Create manually database with name "postgres"
+  - Make sure to adapt your postgres username and password.
 
 ### Setup
 
