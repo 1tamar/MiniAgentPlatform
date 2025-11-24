@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import APIRouter, HTTPException
 
-from base_model import ToolBase, ToolUpdate
+from base_model import ToolBase, ToolUpdate, ToolResponse
 from models import Tool, agent_tools, Agent
 from utils import db_dependency, api_key_dependency
 
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", response_model=List[ToolResponse])
 async def get_tools(db: db_dependency,
                     tenant_id: api_key_dependency,
                     agent_name: Optional[str] = None,
@@ -25,7 +25,7 @@ async def get_tools(db: db_dependency,
     return tools
 
 
-@router.get("/{tool_id}")
+@router.get("/{tool_id}", response_model=ToolResponse)
 async def get_tool_by_id(tool_id: int, db: db_dependency, tenant_id: api_key_dependency):
     tool = db.query(Tool).filter(Tool.tenant_id == tenant_id, Tool.id == tool_id).first()
     if not tool:
@@ -46,7 +46,7 @@ async def delete_tool_by_id(tool_id: int, db: db_dependency, tenant_id: api_key_
     return {"detail": f"Deleted tool {tool_id}"}
 
 
-@router.put("/{tool_id}")
+@router.put("/{tool_id}", response_model=ToolResponse)
 async def update_tool_by_id(tool_id: int, tool_update: ToolUpdate, db: db_dependency, tenant_id: api_key_dependency):
     tool = db.query(Tool).filter(Tool.tenant_id == tenant_id, Tool.id == tool_id).first()
     if not tool:
@@ -60,7 +60,7 @@ async def update_tool_by_id(tool_id: int, tool_update: ToolUpdate, db: db_depend
     return tool
 
 
-@router.post("")
+@router.post("", response_model=ToolResponse)
 async def create_tool(tool: ToolBase, db: db_dependency, tenant_id: api_key_dependency):
     db_tool = Tool(
         name=tool.name,

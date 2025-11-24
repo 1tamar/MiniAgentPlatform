@@ -24,7 +24,7 @@ API_KEYS = {
     },
     "tenant_c": {
         "name": "tenant_c",
-        "request_limit": 5,
+        "request_limit": 2,
         "limit_window": timedelta(minutes=1),
         "count_requests": 0,
         "last_reset": datetime.utcnow()
@@ -56,14 +56,14 @@ api_key_dependency = Annotated[str, Depends(verify_api_key)]
 def check_tenant_limit(tenant_id):
     tenant = API_KEYS.get(tenant_id)
     now = datetime.utcnow()
-    if now - tenant.get("last_reset") > tenant.get("limit_window"):
+    if now - tenant["last_reset"] > tenant["limit_window"]:
         tenant["count_requests"] = 0
         tenant["last_reset"] = now
         return True
-    tenant["count_requests"] += 1
-    if tenant.get("count_requests") >= tenant.get("request_limit"):
-        return False
-    return True
+    if tenant["count_requests"] < tenant["request_limit"]:
+        tenant["count_requests"] += 1
+        return True
+    return False
 
 
 def generate_prompt(agent: Agent, task: str):

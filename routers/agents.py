@@ -1,10 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import HTTPException, APIRouter
 from sqlalchemy.orm import joinedload
 
-from base_model import AgentBase, AgentUpdate, AgentRunRequest
+from base_model import AgentBase, AgentUpdate, AgentRunRequest, AgentResponse, AgentRunResponse
 from models import Agent, Tool, Execution
 from utils import generate_prompt, mock_llm_call, check_tenant_limit, db_dependency, api_key_dependency, \
     SUPPORTED_MODELS
@@ -12,7 +12,7 @@ from utils import generate_prompt, mock_llm_call, check_tenant_limit, db_depende
 router = APIRouter()
 
 
-@router.get("")
+@router.get("", response_model=List[AgentResponse])
 async def get_agents(db: db_dependency,
                      tenant_id: api_key_dependency,
                      tool_name: Optional[str] = None,
@@ -30,7 +30,7 @@ async def get_agents(db: db_dependency,
     return agents
 
 
-@router.get("/{agent_id}")
+@router.get("/{agent_id}", response_model=AgentResponse)
 async def get_agent_by_id(agent_id: int, db: db_dependency, tenant_id: api_key_dependency):
     result = db.query(Agent) \
         .options(joinedload(Agent.tools)) \
@@ -50,7 +50,7 @@ async def delete_agent_by_id(agent_id: int, db: db_dependency, tenant_id: api_ke
     return {"detail": f"Deleted agent: {agent_id}"}
 
 
-@router.put("/{agent_id}")
+@router.put("/{agent_id}", response_model=AgentResponse)
 async def update_agent_by_id(agent_id: int,
                              agent_update: AgentUpdate,
                              db: db_dependency,
@@ -74,7 +74,7 @@ async def update_agent_by_id(agent_id: int,
     return agent
 
 
-@router.post("")
+@router.post("", response_model=AgentResponse)
 async def create_agent(agent: AgentBase, db: db_dependency, tenant_id: api_key_dependency):
     tools = db.query(Tool).filter(Tool.id.in_(agent.tool_ids), Tool.tenant_id == tenant_id).all()
     if len(tools) != len(agent.tool_ids):
@@ -90,11 +90,18 @@ async def create_agent(agent: AgentBase, db: db_dependency, tenant_id: api_key_d
     db.add(db_agent)
     db.commit()
     db.refresh(db_agent)
-    return db_agent
+    return AgentResponse(
+        id=db_agent.id,
+        tenant_id=tenant_id,
+        name=db_agent.name,
+        role=db_agent.role,
+        description=db_agent.description,
+        tools=db_agent.tools
+    )
 
 
-@router.post("{agent_id}/run")
-async def create_agent(agent_id: int, request: AgentRunRequest, db: db_dependency, tenant_id: api_key_dependency):
+@router.post("/{agent_id}/run", response_model=AgentRunResponse)
+async def run_agent(agent_id: int, request: AgentRunRequest, db: db_dependency, tenant_id: api_key_dependency):
     if not check_tenant_limit(tenant_id):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
@@ -118,4 +125,13 @@ async def create_agent(agent_id: int, request: AgentRunRequest, db: db_dependenc
     db.add(db_execution)
     db.commit()
     db.refresh(db_execution)
-    return db_execution
+
+    return AgentRunResponse(
+        execution_id=db_execution.id,
+        agent_id=db_execution.agent_id,
+        agent_name=agent.name,
+        prompt=db_execution.prompt,
+        model=db_execution.model,
+        response=db_execution.response,
+        timestamp=db_execution.timestamp
+    )
