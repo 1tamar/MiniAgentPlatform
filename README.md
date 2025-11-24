@@ -22,7 +22,8 @@ tools and instructions.
 - git
 - PostgreSQL: 
   - Create manually database with name "postgres"
-  - Make sure to adapt your postgres username and password.
+  - Ensure your PostgreSQL username and password are correct
+  - Update the URL_DATABASE or connection settings in the app to match your credentials
 
 ### Setup
 
