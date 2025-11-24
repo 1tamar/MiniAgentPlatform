@@ -10,7 +10,6 @@ tools and instructions.
 - **Tool Management**: Create and assign tools to agents
 - **Agent Execution**: Run agents with tasks and track execution history
 - **Rate Limiting**: Per-tenant API throttling (e.g.10 requests per 60 seconds)
-- 
 ---
 
 ## Installation
@@ -22,7 +21,12 @@ tools and instructions.
 
 ### Setup
 
-1. **Clone project**
+
+1. **Clone the repository**:  
+```bash
+git clone https://github.com/1tamar/MiniAgentPlatform.git
+cd MiniAgentPlatform
+```
 
 2. **Create a virtual environment**:
 
@@ -39,7 +43,7 @@ source venv/bin/activate
 3. **Install requirements from inside project dir**:
 
 ```bash
-pip install -r requiremants.txt
+pip install -r requirements.txt
 ```
 
 4. **Run the application**:
@@ -49,6 +53,9 @@ python main.py
 ```
 
 The server will start at `http://localhost:8000`
+
+---
+
 
 ## API Authentication
 
@@ -75,14 +82,14 @@ API_KEYS = {
     },
     "tenant_c": {
         "name": "tenant_c",
-        "request_limit": 5,
+        "request_limit": 2,
         "limit_window": timedelta(minutes=1),
         "count_requests": 0,
         "last_reset": datetime.utcnow()
     }
 }
 ```
-Include the API key in the `X-API-Key` header for all requests:
+Include the API key in the `X-API-Key: tenant_a` header for all requests:
 
 ---
 
@@ -90,12 +97,11 @@ Include the API key in the `X-API-Key` header for all requests:
 ## API Endpoints
 ## Interactive API Documentation
 
-FastAPI provides automatic interactive documentation:
-
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 
 These interfaces allow you to test all endpoints directly from your browser.
+
 ### Tools
 
 #### - Create - `POST /tools`
@@ -126,50 +132,11 @@ These interfaces allow you to test all endpoints directly from your browser.
 
 ---
 
-### Database Schema
-
-```
-┌─────────────┐
-│   Tool      │
-├─────────────┤
-│ id          │
-│ tenant_id   │
-│ name        │
-│ description │
-└─────────────┘
-       │
-       │ 
-       │
-┌──────────────┐      ┌─────────────────────┐
-│   Agents     │──────│  Executions         │
-├──────────────┤      ├─────────────────────┤
-│ id           │      │ id                  │
-│ tenant_id    │      │ tenant_id           │
-│ name         │      │ agent_id            │
-│ role         │      │ prompt              │
-│ description  │      │ model               │
-└──────────────┘      │ response            │
-                      │ timestamp           │
-                      └─────────────────────┘
-```
-
----
-
 ## Testing
 
-### Test Coverage
-
-- **Authentication**: API key validation and tenant isolation
-- **Tool CRUD**: Create, read, update, delete operations
-- **Agent CRUD**: Full agent management with tool associations
-- **Tenant Isolation**: Ensures complete data separation between tenants
-- **Agent Execution**: Running agents with tasks and tracking history
-- **Rate Limiting**: Per-tenant throttling enforcement
-- **Pagination**: Handling large result sets
-- **Filtering**: Query operations with filters
-
-Run the comprehensive test suite:
+The project includes a test suite.
+To run the tests:
 
 ```bash
-pytest test_main.py -v
+pytest tests/test_main.py -v
 ```
