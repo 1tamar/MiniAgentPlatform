@@ -6,8 +6,8 @@ tools.
 ## Features
 
 - **Multi-Tenant Architecture**: Complete data isolation using tenant-based API keys
-- **Agent Management**: Full CRUD operations for AI agents with roles and descriptions
-- **Tool Management**: Create and assign tools to agents
+- **Agent Management**: Full CRUD operations
+- **Tool Management**: Full CRUD operations
 - **Agent Execution**: Run agents with tasks and track execution history
 - **Rate Limiting**: Per-tenant API throttling (e.g.10 requests per 60 seconds)
 ---
@@ -76,25 +76,16 @@ The platform uses API key-based authentication. Each API key represents a differ
 
 API_KEYS = {
     "tenant_a": {
-        "name": "tenant_a",
         "request_limit": 10,
-        "limit_window": timedelta(hours=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(hours=1)
     },
     "tenant_b": {
-        "name": "tenant_b",
         "request_limit": 200,
-        "limit_window": timedelta(days=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(days=1)
     },
     "tenant_c": {
-        "name": "tenant_c",
         "request_limit": 2,
-        "limit_window": timedelta(minutes=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(minutes=1)
     }
 }
 ```
