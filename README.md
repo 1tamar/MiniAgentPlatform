@@ -26,8 +26,6 @@ tools.
   - Update the URL_DATABASE or connection settings in the app to match your credentials
 - Redis:
   - Ensure redis server is started
-- Redis:
-  - 
 
 ### Setup
 
@@ -103,9 +101,9 @@ API_KEYS = {
 
 These interfaces allow you to test all endpoints directly from your browser.
 
-### Tools
+### Tools:
 
-#### - Create - `POST /tools`
+- **Create** - `POST /tools`
 
 ```
 Body:
@@ -115,15 +113,15 @@ Body:
 }
 ```
 
-#### - Get all - `Get /tools`
+- **Get all** - `Get /tools`
 
-#### - GET by agent name `/tools?agent_name=agent_name`
+- **GET by agent name** `/tools?agent_name=agent_name`
 
-#### - Get by tool id - `Get /tools/{tool_id}`
+- **Get by tool id** - `Get /tools/{tool_id}`
 
-#### - Get by tool name - `Get /tools/{tool_name}`
+- **Get by tool name** - `Get /tools/{tool_name}`
 
-#### - Update - `PUT /tools/{tool_id}`
+- **Update** - `PUT /tools/{tool_id}`
 
 ```
 Body:
@@ -133,11 +131,11 @@ Body:
 }
 ```
 
-#### - Delete by id - `DELETE /tools/{tool_id}`
+- **Delete by id** - `DELETE /tools/{tool_id}`
 
-### Agents
+### Agents:
 
-#### - Create - `POST /agents`
+- **Create** - `POST /agents`
 
 ```
 Body:
@@ -150,15 +148,15 @@ Body:
 }
 ```
 
-#### - Get all - `Get /agents`
+- **Get all** - `Get /agents`
 
-#### - GET by tool name `/agents?tool_name=tool_name`
+- **GET by tool name** `/agents?tool_name=tool_name`
 
-#### - Get by agent id - `Get /agents/{agent_id}`
+- **Get by agent id** - `Get /agents/{agent_id}`
 
-#### - Get by agent name - `Get /agents/{agent_name}`
+- **Get by agent name** - `Get /agents/{agent_name}`
 
-#### - Update - `PUT /agents/{agent_id}`
+- **Update** - `PUT /agents/{agent_id}`
 
 ```
 Body:
@@ -169,9 +167,9 @@ Body:
 }
 ```
 
-#### - Delete by id - `DELETE /agents/{agent_id}`
+- **Delete by id** - `DELETE /agents/{agent_id}`
 
-#### - Run agent by id - `Post /agents/{agent_id}/run`
+- **Run agent by id** - `Post /agents/{agent_id}/run`
 
 **model should be one of the SUPPORTED_MODELS: ["gpt-4o", "gpt-4-turbo", "claude-3-opus"]**
 
@@ -183,17 +181,17 @@ Body:
 }
 ```
 
-### Executions
+### Executions:
 
-#### - Get all - `GET /executions`
+- **Get all** - `GET /executions`
 
-#### - Get by agent_id - `GET /executions?agent_id=1`
+- **Get by agent_id** - `GET /executions?agent_id=1`
 
-#### - Get with Pagination - `GET /executions?page=1&page_size=10`
+- **Get with Pagination** - `GET /executions?page=1&page_size=10`
 
 ---
 
-## Testing
+## Testing:
 
 The project includes a test suite.
 To run the tests:
