@@ -1,7 +1,7 @@
 # Mini Agent Platform
 
 A multi-tenant AI agent management system that allows you to create, manage, and execute AI agents with configurable
-tools and instructions.
+tools.
 
 ## Features
 
@@ -10,7 +10,6 @@ tools and instructions.
 - **Tool Management**: Create and assign tools to agents
 - **Agent Execution**: Run agents with tasks and track execution history
 - **Rate Limiting**: Per-tenant API throttling (e.g.10 requests per 60 seconds)
-
 ---
 
 ## Installation
@@ -21,9 +20,14 @@ tools and instructions.
 - pip
 - git
 - PostgreSQL: 
+  - Ensure postgresql server is started:
   - Create manually database with name "postgres"
   - Ensure your PostgreSQL username and password are correct
   - Update the URL_DATABASE or connection settings in the app to match your credentials
+- Redis:
+  - Ensure redis server is started
+- Redis:
+  - 
 
 ### Setup
 
@@ -95,7 +99,7 @@ API_KEYS = {
 }
 ```
 
-## Include the API key in the `X-API-Key: tenant_a` header for all requests!
+### Include the API key in the `X-API-Key: tenant_a` header for all requests!
 
 ---
 

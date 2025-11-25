@@ -6,3 +6,4 @@ sqlalchemy>=2.0.0
 pytest
 httpx
 pytest-asyncio
+redis-server

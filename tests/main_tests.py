@@ -3,7 +3,14 @@ from fastapi.testclient import TestClient
 
 from database import Base, engine, SessionLocal
 from main import app
-from utils import API_KEYS
+from utils import API_KEYS, redis_client
+
+
+@pytest.fixture()
+def flush_redis():
+    redis_client.flushdb()
+    yield
+    redis_client.flushdb()
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -14,7 +21,6 @@ def create_db():
 
 @pytest.fixture(scope="function", autouse=True)
 def db_session():
-
     connection = engine.connect()
     transaction = connection.begin()
 
@@ -158,7 +164,7 @@ class TestAgentCRUD:
         assert response_data["name"] == "New name"
         assert response_data["role"] == agent1["role"]
 
-    def test_run_agent_and_rate_limit_per_tenant(self, client, agent1, agent2, real_header):
+    def test_run_agent_and_rate_limit_per_tenant(self, client, agent1, agent2, real_header, flush_redis):
         agent = client.post(url="/agents",
                             json=agent1,
                             headers={"X-API-Key": "tenant_c"}).json()
@@ -281,17 +287,18 @@ class TestToolCRUD:
 
 class TestExecutions:
 
-    def test_get_executions(self, client, agent1, real_header):
+    def test_get_executions(self, client, agent1, real_header, flush_redis):
         agent = client.post(url="/agents",
                             json=agent1,
                             headers=real_header).json()
         exists_executions = client.get(url="/executions",
                                        headers=real_header).json()
         for i in range(5):
-            client.post(
+            res = client.post(
                 url=f"/agents/{agent['id']}/run",
                 json={"task": f"Task {i}", "model": "gpt-4o"},
                 headers=real_header)
+            assert res.status_code == 200
         response = client.get(url="/executions",
                               headers=real_header)
         assert response.status_code == 200

@@ -1,33 +1,33 @@
 from datetime import datetime, timedelta
 from typing import Annotated
 
+import redis
 from fastapi import Header, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
 from models import Agent
 
+redis_client = redis.Redis(
+    host='localhost',
+    port=6379,
+    db=0,
+    decode_responses=True
+)
+REDIS_KEY = "rate_limit"
+
 API_KEYS = {
     "tenant_a": {
-        "name": "tenant_a",
         "request_limit": 10,
-        "limit_window": timedelta(hours=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(hours=1)
     },
     "tenant_b": {
-        "name": "tenant_b",
         "request_limit": 200,
-        "limit_window": timedelta(days=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(days=1)
     },
     "tenant_c": {
-        "name": "tenant_c",
         "request_limit": 2,
-        "limit_window": timedelta(minutes=1),
-        "count_requests": 0,
-        "last_reset": datetime.utcnow()
+        "limit_window": timedelta(minutes=1)
     }
 }
 
@@ -46,7 +46,7 @@ def verify_api_key(tenant_id_header: str = Header(..., alias="x-api-key")):
     tenant_id = API_KEYS.get(tenant_id_header)
     if not tenant_id:
         raise HTTPException(status_code=401, detail="Invalid API key")
-    return tenant_id.get("name")
+    return tenant_id_header
 
 
 db_dependency = Annotated[Session, Depends(get_db)]
@@ -56,14 +56,28 @@ api_key_dependency = Annotated[str, Depends(verify_api_key)]
 def check_tenant_limit(tenant_id):
     tenant = API_KEYS.get(tenant_id)
     now = datetime.utcnow()
-    if now - tenant["last_reset"] > tenant["limit_window"]:
-        tenant["count_requests"] = 0
-        tenant["last_reset"] = now
-        return True
-    if tenant["count_requests"] < tenant["request_limit"]:
-        tenant["count_requests"] += 1
-        return True
-    return False
+
+    count = redis_client.get(f"{REDIS_KEY}:{tenant_id}:count")
+    count = int(count) if count else 0
+    last_reset = redis_client.get(f"{REDIS_KEY}:{tenant_id}:last_reset")
+    if last_reset:
+        last_reset = datetime.fromisoformat(last_reset)
+
+    else:
+        last_reset = now
+        redis_client.set(f"{REDIS_KEY}:{tenant_id}:last_reset", now.isoformat())
+
+    time_diff = now - last_reset
+    if time_diff >= tenant["limit_window"]:
+        redis_client.set(f"{REDIS_KEY}:{tenant_id}:count", 0)
+        redis_client.set(f"{REDIS_KEY}:{tenant_id}:last_reset", now.isoformat())
+        count = 0
+
+    if count >= tenant["request_limit"]:
+        return False
+
+    redis_client.incr(f"{REDIS_KEY}:{tenant_id}:count")
+    return True
 
 
 def generate_prompt(agent: Agent, task: str):
