@@ -143,8 +143,7 @@ Body:
   "name": "agent1",
   "role": "assistant",
   "description": "Agent that does X",
-  "tenant_id": 1,
-  "tool_ids": [1]
+  "tool_ids": []
 }
 ```
 
